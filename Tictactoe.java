@@ -1,4 +1,4 @@
-package school;
+package tictactoe;
 
 //all the imports
 import java.awt.*;
@@ -23,9 +23,9 @@ public class Tictactoe extends JFrame {
 	//J objects
 	JButton play,match;
 	JCheckBox playX,playO;
-	JPanel west,westNorth,westCenter,south,southCenter,westNorthCenter;
+	JPanel west,westNorth,westCenter,south,southCenter,westNorthCenter,westSouthCenter;
 	JLabel wins,turnXO;
-	JRadioButton PVC,PVP;
+	JRadioButton PVC,PVP,aiX,aiO;
 	//variables
 	boolean xturn,oturn;
 	ButtonGroup group1,group2;
@@ -34,7 +34,8 @@ public class Tictactoe extends JFrame {
 	boolean newG;
 	int Owins=0;
 	int Xwins=0;
-	boolean playerX=true;
+	boolean player=true;
+	int aiXO=2;
 	Font times=new Font("Times new roman",Font.BOLD,48); 
 	Font times1=new Font("Times new roman",Font.BOLD,20); 
 	//main class
@@ -54,6 +55,8 @@ public class Tictactoe extends JFrame {
 		//Radiobuttons deciding whether its player vs computer or player vs player and adds an action listener to each
 		PVC=choiceXO("Player v.s Computer",true);
 		PVP=choiceXO("Player v.s Player",false);
+		aiX=playXO("Ai as X",false);
+		aiO=playXO("Ai as O",true);
 		//creates the new buttons for new match and new game and adds an action listener to each
 		match=makeMeButtons1("New Match");
 		play=makeMeButtons("New Game");
@@ -63,10 +66,15 @@ public class Tictactoe extends JFrame {
 		group1=new ButtonGroup();
 		group1.add(PVC);
 		group1.add(PVP);
+		
+		group2=new ButtonGroup();
+		group2.add(aiX);
+		group2.add(aiO);
 		//player v.s computer is default
 		PVC.setSelected(true);
 		//creates JPanels where the components are going to placed
 		westNorthCenter=new JPanel();
+		westSouthCenter=new JPanel();
 		west=new JPanel();
 		westNorth=new JPanel();
 		westCenter=new JPanel();
@@ -80,6 +88,7 @@ public class Tictactoe extends JFrame {
 		//creates a new layout
 		westNorthCenter.setLayout (new BorderLayout ());
 		westCenter.setLayout (new BorderLayout ());
+		westSouthCenter.setLayout (new BorderLayout ());
 		west.setLayout (new BorderLayout ());
 		westNorth.setLayout (new BorderLayout ());
 		south.setLayout (new BorderLayout ());
@@ -87,8 +96,11 @@ public class Tictactoe extends JFrame {
 		westCenter.add(westNorthCenter,BorderLayout.NORTH);
 		westNorthCenter.add(PVC,BorderLayout.NORTH);
 		westNorthCenter.add(PVP,BorderLayout.CENTER);
+		westSouthCenter.add(aiX,BorderLayout.SOUTH);
+		westSouthCenter.add(aiO,BorderLayout.CENTER);
 		west.add(westNorth,BorderLayout.NORTH);
 		west.add(westCenter,BorderLayout.CENTER);
+		west.add(westSouthCenter,BorderLayout.SOUTH);
 		westNorth.add(play, BorderLayout.NORTH);
 		westNorth.add(match,BorderLayout.CENTER);
 		south.add(southCenter,BorderLayout.CENTER);
@@ -109,7 +121,7 @@ public class Tictactoe extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				jNewG=true;
-				if(playerX){
+				if(player){
 					turn=1;
 					newG=true;
 					repaint();
@@ -166,6 +178,51 @@ public class Tictactoe extends JFrame {
 		return theBut2; 
 
 	}
+	public JRadioButton playXO(String name,final boolean XorO){
+		boolean click;
+		if(XorO){
+			click=true;
+		}
+		else{
+			click=false;
+		}
+		JRadioButton theRadio= new JRadioButton(name,click);
+
+
+		theRadio.addActionListener(new ActionListener() {
+
+
+
+			public void actionPerformed(ActionEvent e) {
+				if(newG){
+					newG=false;
+					turnXO.setText("Press new game to play with new ai");
+					if(XorO){
+						aiXO=2;
+					}
+					else{
+						aiXO=1;
+					}
+				}
+				else{
+					if(XorO){
+						aiXO=2;
+					}
+					else{
+						aiXO=1;
+					}
+				}
+
+			}
+
+		});
+
+
+
+		return theRadio; 
+
+	}
+	
 	public JRadioButton choiceXO(String name,final boolean XorO){
 		boolean click;
 		if(XorO){
@@ -186,18 +243,18 @@ public class Tictactoe extends JFrame {
 					newG=false;
 					turnXO.setText("Press new game to play new mode");
 					if(XorO){
-						playerX=true;
+						player=true;
 					}
 					else{
-						playerX=false;
+						player=false;
 					}
 				}
 				else{
 					if(XorO){
-						playerX=true;
+						player=true;
 					}
 					else{
-						playerX=false;
+						player=false;
 					}
 				}
 
@@ -210,7 +267,6 @@ public class Tictactoe extends JFrame {
 		return theRadio; 
 
 	}
-
 	class DrawingBoard extends JComponent {
 		/**
 		 * 
@@ -218,31 +274,32 @@ public class Tictactoe extends JFrame {
 		private static final long serialVersionUID = 1L;
 		int x,x1,x2;
 		int y,y1,y2;
-		int ax,ax1;
-		int ay,ay1;
 		int xP;
 		int yP;
 		int arrayXO[][]=new int[3][3];
 		int patterns1[]=new int[8];
 		int patterns2[]=new int[8];
+		
+		                     
 		int r2;
 		/*pattern[0-2] is rows
 		 * pattern[3-5]is columns
 		 *pattern[6-7]is diagonal 
 		 * 
 		 */
+		int ax1,ax,ay,ay1;
 		Random rand = new Random();
 		boolean moveO=true;
 		boolean choice=true;
 		boolean Xtru;
-		boolean Ytru;
+		boolean Otru;
 		boolean choice2,choice3;
 		int s,r;
 		int pax,pay;
 
 		public DrawingBoard(){
-			zeroPatternX();
-
+			zeroPattern();
+			
 			this.addMouseListener(new MouseAdapter(){
 				public void mousePressed(MouseEvent e)
 				{
@@ -256,19 +313,25 @@ public class Tictactoe extends JFrame {
 							if (arrayXO[x1][y1]==0){
 								if(xturn){
 									arrayXO[x1][y1]=1;
-									x2=x1*200;
-									y2=y1*200;
-									Xtru=true;
 									turn+=1;
-									repaint(0,x1*200,y1*200,200,200);
+									repaint();
+									if(checkWins(1,arrayXO)) {
+										Xwins++;
+										newG=false;
+										turnXO.setText("X Won");
+									}
+									else changeTurn();
 								}
 								else if(oturn){
-									arrayXO[x1][y1]=1;
-									ax1=x1;
-									ay1=y1;
-									Ytru=true;
+									arrayXO[x1][y1]=2;
 									turn+=1;
-									repaint(0,x1*200,y1*200,200,200);
+									repaint();
+									if(checkWins(2,arrayXO)) {
+										Owins++;
+										newG=false;
+										turnXO.setText("O Won");
+									}
+									else changeTurn();
 
 								}
 							}
@@ -280,1014 +343,132 @@ public class Tictactoe extends JFrame {
 
 
 		}
-		public void AiO1(){
-			//first checks if it can win
-			if(playerX){
-				moveO=true;
-				for(s=0;s<8;s++){
-					if(moveO){
-						if(patterns2[s]==11){
-							if(s==0||s==1||s==2){
-								ax=0;
-								ay=s;
-								if(arrayXO[ax][ay]==0){
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-
-								}
-
-							}
-							else if((s==3||s==4||s==5)){
-								ax=s-3;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==6)){
-								ax=0;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==7)){
-								ax=2;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-						}
-						else if(patterns2[s]==101){
-							if(s==0||s==1||s==2){
-								ax=1;
-								ay=s;
-								if(arrayXO[ax][ay]==0){
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-
-								}
-
-							}
-							else if((s==3||s==4||s==5)){
-								ax=s-3;
-								ay=1;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==6)){
-								ax=1;
-								ay=1;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==7)){
-								ax=1;
-								ay=1;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-						}
-						else if(patterns2[s]==110){
-							if(s==0||s==1||s==2){
-								ax=2;
-								ay=s;
-								if(arrayXO[ax][ay]==0){
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-
-								}
-
-							}
-							else if((s==3||s==4||s==5)){
-								ax=s-3;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==6)){
-								ax=2;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==7)){
-								ax=0;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-						}
-					}
-				}
-				for(s=0;s<8;s++){
-					if(moveO){
-						if(patterns1[s]==11){
-							if(s==0||s==1||s==2){
-								ax=0;
-								ay=s;
-								if(arrayXO[ax][ay]==0){
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-
-								}
-
-							}
-							else if((s==3||s==4||s==5)){
-								ax=s-3;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==6)){
-								ax=0;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==7)){
-								ax=2;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-						}
-						else if(patterns1[s]==101){
-							if(s==0||s==1||s==2){
-								ax=1;
-								ay=s;
-								if(arrayXO[ax][ay]==0){
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-
-								}
-
-							}
-							else if((s==3||s==4||s==5)){
-								ax=s-3;
-								ay=1;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==6)){
-								ax=1;
-								ay=1;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==7)){
-								ax=1;
-								ay=1;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-						}
-						else if(patterns1[s]==110){
-							if(s==0||s==1||s==2){
-								ax=2;
-								ay=s;
-								if(arrayXO[ax][ay]==0){
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-
-								}
-
-							}
-							else if((s==3||s==4||s==5)){
-								ax=s-3;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==6)){
-								ax=2;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.print(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-							else if((s==7)){
-								ax=0;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-
-								}
-							}
-						}
-					}
-				}
-				if(moveO){
-					if(turn==2){
-
-						r=rand.nextInt(4)+1;
-						if(r==1&&arrayXO[0][0]==0){
-
-							ax=0;
-							ay=0;
-							arrayXO[ax][ay]=1;
-							Ytru=true;
-							choice=false;
-							moveO=false;
-							ax1=ax;
-							ay1=ay;
-							pax=ax;
-							pay=ay;
-							repaint(0,ax*200,ay*200,200,200);
-
-						}
-						else if(r==2&&arrayXO[2][0]==0){
-							ax=2;
-							ay=0;
-							arrayXO[ax][ay]=1;
-							Ytru=true;
-							choice=false;
-							moveO=false;
-							ax1=ax;
-							ay1=ay;
-							pax=ax;
-							pay=ay;
-							repaint(0,ax*200,ay*200,200,200);
-						}
-						else if(r==3&&arrayXO[0][2]==0){
-							ax=0;
-							ay=2;
-							arrayXO[ax][ay]=1;
-							Ytru=true;
-							choice=false;
-							moveO=false;
-							ax1=ax;
-							ay1=ay;
-							pax=ax;
-							pay=ay;
-							repaint(0,ax*200,ay*200,200,200);
-						}
-						else if(r==4&&arrayXO[2][2]==0){
-							ax=2;
-							ay=2;
-							arrayXO[ax][ay]=1;
-							Ytru=true;
-							choice=false;
-							moveO=false;
-							ax1=ax;
-							ay1=ay;
-							pax=ax;
-							pay=ay;
-							repaint(0,ax*200,ay*200,200,200);
-						}
-					}
-
-
-
-					else if(turn==4){
-						if((pax==0||pax==2)&&(pay==0||pay==2)){
-							if(arrayXO[1][1]==1){
-								if(pax==0&&pay==0){
-									r=rand.nextInt(2)+1;
-									if(r==1){
-										ax=2;
-										ay=1;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-									else if(r==2){
-										ax=1;
-										ay=2;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-
-								}
-								else if(pax==2&&pay==0){
-									r=rand.nextInt(2)+1;
-									if(r==1){
-										ax=1;
-										ay=2;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-									else if(r==2){
-										ax=0;
-										ay=1;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-
-								}
-								else if(pax==0&&pay==2){
-									r=rand.nextInt(2)+1;
-									if(r==1){
-										ax=1;
-										ay=0;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-									else if(r==2){
-										ax=2;
-										ay=1;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-
-								}
-								else if(pax==2&&pay==2){
-									r=rand.nextInt(2)+1;
-									if(r==1){
-										ax=1;
-										ay=0;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-									else if(r==2){
-										ax=0;
-										ay=1;
-										if(arrayXO[ax][ay]==0){
-											System.out.println(true);
-											arrayXO[ax][ay]=1;
-											Ytru=true;
-											moveO=false;
-											ax1=ax;
-											ay1=ay;
-											pax=ax;
-											pay=ay;
-											repaint(0,ax*200,ay*200,200,200);
-										}
-									}
-
-								}
-
-
-								else if(arrayXO[1][1]==0){
-									if(pax==0&&pay==0){
-										r=rand.nextInt(2)+1;
-										if(r==1){
-											ax=2;
-											ay=0;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-										else if(r==2){
-											ax=0;
-											ay=2;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-
-									}
-									else if(pax==2&&pay==0){
-										r=rand.nextInt(2)+1;
-										if(r==1){
-											ax=0;
-											ay=0;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-										else if(r==2){
-											ax=2;
-											ay=2;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-
-									}
-									else if(pax==0&&pay==2){
-										r=rand.nextInt(2)+1;
-										if(r==1){
-											ax=0;
-											ay=2;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-										else if(r==2){
-											ax=2;
-											ay=2;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-
-									}
-									else if(pax==2&&pay==2){
-										r=rand.nextInt(2)+1;
-										if(r==1){
-											ax=2;
-											ay=0;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-										else if(r==2){
-											ax=0;
-											ay=2;
-											if(arrayXO[ax][ay]==0){
-												System.out.println(true);
-												arrayXO[ax][ay]=1;
-												Ytru=true;
-												moveO=false;
-												ax1=ax;
-												ay1=ay;
-												pax=ax;
-												pay=ay;
-												repaint(0,ax*200,ay*200,200,200);
-											}
-										}
-									}
-								}
-
-							}
-						}
-					}
-					else if(turn==6){
-						if(pax==1&&pay==0){
-							if(arrayXO[0][2]==1){
-								ax=0;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-							else if(arrayXO[2][2]==1){
-								ax=2;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-						}
-						else if(pax==0&&pay==1){
-							if(arrayXO[2][0]==1){
-								ax=0;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-							else if(arrayXO[2][2]==1){
-								ax=0;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-						}
-						else if(pax==2&&pay==1){
-							if(arrayXO[0][0]==1){
-								ax=2;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-							else if(arrayXO[0][2]==1){
-								ax=2;
-								ay=2;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-						}
-						else if(pax==1&&pay==2){
-							if(arrayXO[0][0]==1){
-								ax=0;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-							else if(arrayXO[0][2]==1){
-								ax=2;
-								ay=0;
-								if(arrayXO[ax][ay]==0){
-									System.out.println(true);
-									arrayXO[ax][ay]=1;
-									Ytru=true;
-									moveO=false;
-									ax1=ax;
-									ay1=ay;
-									pax=ax;
-									pay=ay;
-									repaint(0,ax*200,ay*200,200,200);
-								}
-							}
-						}
-					}
-				}
-				while(moveO&&turn!=10){
-					ax=rand.nextInt(3)+0;
-					ay=rand.nextInt(3)+0;
-					System.out.println(ax+" "+ay);
-					if(arrayXO[ax][ay]==0){
-						System.out.println(true);
-						arrayXO[ax][ay]=1;
-						Ytru=true;
-						moveO=false;
-						ax1=ax;
-						ay1=ay;
-						pax=ax;
-						pay=ay;
-						repaint(0,ax*200,ay*200,200,200);
-					}
-				}
-				moveO=true;
-				if(moveO){
-					turn+=1;
-				}
-
-
-
-
-
-
-
-
-				patternsO();
+		
+		public void changeTurn() {
+			if(turn==9) {
+				newG=false;
+				turnXO.setText("Tied");
 			}
+			else {
+				if(oturn){
+	
+					turnXO.setText("X's Turn");
+					xturn=true;
+					oturn=false;
+					if(aiXO==1&&player) {
+						ai(1);
+						turnXO.setText("Your Turn");
+					}
+				}
+				
+				else if(xturn){
+					turnXO.setText("O's Turn");
+					xturn=false;
+					oturn=true;
+					if(aiXO==2&&player) {
+						ai(2);
+						turnXO.setText("Your Turn");
+					}
+				}
+			}
+		}
+		void ai(int p) {
+			int[][] array=new int[3][3];
+			array=copyArray(arrayXO);
+			int x=100,y=100;
+			int bestScore=-10000;
+			for(int i=0;i<3;i++){
+				for(int j=0;j<3;j++) {
+					if(arrayXO[i][j]==0) {
+						int temp=bestMove(array,i,j,1000,p);
+						array=copyArray(arrayXO);
+						//System.out.println(temp);
+						if(temp>bestScore) {
+							bestScore=temp;
+							x=i;
+							y=j;
+						}
+					}
+				}
+			}
+			arrayXO[x][y]=p;
+			repaint();
+			if(checkWins(aiXO,arrayXO)) {
+				newG=false;
+				turnXO.setText("Ai Won");
+			}
+			else {
+				turn++;
+				changeTurn();
+			}
+		}
+		
+		 int[][] copyArray(int[][] arrayXO2) {
+			 int array[][]=new int[3][3];
+			 for(int i=0;i<3;i++) {
+				 for(int j=0;j<3;j++) {
+						array[i][j]=arrayXO2[i][j];
+				 }
+			 }
+			 return array;
+		}
 
+		public int bestMove(int[][] array,int x,int y,int n,int p) {
+			
+			int score=0;
+			array[x][y]=p;
+			if(checkWins(p,array)) {
+				return n;
+			}
+			int i=0;
+			int j=0;
+			while(j<3){
+				if(array[i][j]==0) {
+					if(p==1) {
+						if(p==aiXO)n=n*-1;
+						else n=(n/10)*-1;
+						score+=bestMove(array,i,j,n,2);
+					}
+					else if(p==2) {
+						if(p==aiXO)n=n*-1;
+						else n=n/10*-1;
+						score+=bestMove(array,i,j,n,1);
+					}
+				}
+				i++;
+				if(i>2) {
+					i=0;
+					j++;		
+				}
+			}
+			return score;
 		}
 		public void drawO(Graphics g){
-			Graphics2D g2d = (Graphics2D)g;
-			g2d.setStroke(new BasicStroke(15, BasicStroke.CAP_ROUND,
-					BasicStroke.JOIN_ROUND));
-			g2d.setColor(Color.BLUE);
-			g2d.drawOval((ax1*200)+15,(ay1*200)+15,170,170);
-			if(playerX==false){
-				patternsO();
-				if(newG){
-					turnXO.setText("X's Turn");
+			for(int x=0;x<3;x++) {
+				for(int y=0;y<3;y++) {
+					if(arrayXO[x][y]==2) {
+						Graphics2D g2d = (Graphics2D)g;
+						g2d.setStroke(new BasicStroke(15, BasicStroke.CAP_ROUND,
+								BasicStroke.JOIN_ROUND));
+						g2d.setColor(Color.BLUE);
+						g2d.drawOval((x*200)+15,(y*200)+15,170,170);
+					}
 				}
-				xturn=true;
-				oturn=false;
 			}
-
 		}
-		public void patternsO(){
-
-			if(ax1==0&&ay==0){
-				patterns2[0]+=100;
-				patterns2[3]+=100;
-				patterns2[6]+=100;
-
+		
+		public boolean checkWins(int p,int[][] array) {
+			for(int x=0;x<3;x++) {
+				if(array[x][0]==p&&array[x][1]==p&&array[x][2]==p)return true;
 			}
-			if(ax1==1&&ay1==0){
-				patterns2[0]+=10;
-				patterns2[4]+=100;
-
-
+			for(int y=0;y<3;y++) {
+				if(array[0][y]==p&&array[1][y]==p&&array[2][y]==p)return true;
 			}
-			if(ax1==2&&ay1==0){
-				patterns2[0]+=1;
-				patterns2[5]+=100;
-				patterns2[7]+=100;
-
-			}
-			if(ax1==0&&ay1==1){
-				patterns2[1]+=100;
-				patterns2[3]+=10;
-
-
-			}
-			if(ax1==1&&ay1==1){
-				patterns2[1]+=10;
-				patterns2[4]+=10;
-				patterns2[6]+=10;
-				patterns2[7]+=10;
-
-
-			}
-			if(ax1==2&&ay1==1){
-				patterns2[1]+=1;
-				patterns2[5]+=10;
-
-
-			}
-			if(ax1==0&&ay1==2){
-				patterns2[2]+=100;
-				patterns2[3]+=1;
-				patterns2[7]+=1;
-
-			}
-			if(ax1==1&&ay1==2){
-				patterns2[2]+=10;
-				patterns2[4]+=1;
-
-			}
-			if(ax1==2&&ay1==2){
-				patterns2[2]+=1;
-				patterns2[5]+=1;
-				patterns2[6]+=1;
-
-			}
-			for(s=0;s<8;s++){
-				if(patterns2[s]==111){
-					System.out.println("O wins "+s);
-					newG=false;
-					Owins+=1;
-					wins.setText(Xwins+"||"+Owins);
-					turnXO.setText("O wins/Press new game to continue");
-					zeroPatternX();
-
-
-				}
-
-			}
-
+			if(array[0][0]==p&&array[1][1]==p&&array[2][2]==p)return true;
+			if(array[2][0]==p&&array[1][1]==p&&array[0][2]==p)return true;
+			return false;
 		}
+		
 		public void grid(Graphics g){
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.setStroke(new BasicStroke(5, BasicStroke.CAP_ROUND,
@@ -1312,144 +493,53 @@ public class Tictactoe extends JFrame {
 				}
 			}
 		}
+		
 		public void drawX(Graphics g){
-			Graphics2D g2d = (Graphics2D)g;
-			g2d.setStroke(new BasicStroke(15, BasicStroke.CAP_ROUND,
-					BasicStroke.JOIN_ROUND));
-			g2d.setColor(Color.RED);
-			g2d.drawLine(x2+20, y2+20,x2+180,y2+180);
-			g2d.drawLine(x2+180, y2+20, x2+20, y2+180);
-			patternsX();
-			if(playerX==false){
-				if(newG){
-					turnXO.setText("O's Turn");
+			for(int i=0;i<3;i++) {
+				for(int j=0;j<3;j++) {
+					if(arrayXO[i][j]==1) {
+						x=i*200;
+						y=j*200;
+						Graphics2D g2d = (Graphics2D)g;
+						g2d.setStroke(new BasicStroke(15, BasicStroke.CAP_ROUND,
+							BasicStroke.JOIN_ROUND));
+						g2d.setColor(Color.RED);
+						g2d.drawLine(x+20, y+20,x+180,y+180);
+						g2d.drawLine(x+180, y+20, x+20, y+180);
+					}
 				}
-				xturn=false;
-				oturn=true;
 			}
 
 		}
-		public void zeroPatternX(){
+		
+		
+		public void zeroPattern(){
 
-			for(int s=0;s<8;s++){
-				patterns1[s]=0;
-				patterns2[s]=0;
-			}
 			for(int s=0;s<3;s++){
 				for(int i=0;i<3;i++){
 					arrayXO[s][i]=0;
 				}
 			}
+			turn=0;
 
 		}
-		public void patternsX(){
-
-			if(x1==0&&y1==0){
-				patterns1[0]+=100;
-				patterns1[3]+=100;
-				patterns1[6]+=100;
-
-			}
-			if(x1==1&&y1==0){
-				patterns1[0]+=10;
-				patterns1[4]+=100;
-
-
-			}
-			if(x1==2&&y1==0){
-				patterns1[0]+=1;
-				patterns1[5]+=100;
-				patterns1[7]+=100;
-
-			}
-			if(x1==0&&y1==1){
-				patterns1[1]+=100;
-				patterns1[3]+=10;
-
-
-			}
-			if(x1==1&&y1==1){
-				patterns1[1]+=10;
-				patterns1[4]+=10;
-				patterns1[6]+=10;
-				patterns1[7]+=10;
-
-
-			}
-			if(x1==2&&y1==1){
-				patterns1[1]+=1;
-				patterns1[5]+=10;
-
-
-			}
-			if(x1==0&&y1==2){
-				patterns1[2]+=100;
-				patterns1[3]+=1;
-				patterns1[7]+=1;
-
-			}
-			if(x1==1&&y1==2){
-				patterns1[2]+=10;
-				patterns1[4]+=1;
-
-
-			}
-			if(x1==2&&y1==2){
-				patterns1[2]+=1;
-				patterns1[5]+=1;
-				patterns1[6]+=1;
-
-			}
-			for(s=0;s<8;s++){
-				if(patterns1[s]==111){
-					System.out.println("X wins "+s);
-					newG=false;
-					Xwins+=1;
-					wins.setText(Xwins+"||"+Owins);
-					turnXO.setText("X wins/Press new game to continue");
-					zeroPatternX();
-
-
-				}       
-			}
-
-			if(turn==10&&newG){
-
-				turnXO.setText("Draw/Press new game to continue");
-				newG=false;
-			}
-
-			if(newG&&playerX){
-				AiO1();
-			}
-		}
+		
 
 		public void paint(Graphics g){
 			if(jNewG){
-				zeroPatternX();
+				zeroPattern();
 				jNewG=false;
+				if(aiXO==1) {
+					ai(1);
+				}
 			}
 			super.paintComponent(g);    
 			g.setColor(Color.WHITE);
 			g.fillRect(0, 0, 600, 600);
 			g.setColor(Color.BLACK);
 			grid(g);
-			if(turn==1){
-				zeroPatternX();
-			}
-			if(Xtru){
-				Xtru=false;
-				drawX(g);
-
-
-			}
-			else if(Ytru){
-				Ytru=false;
-				drawO(g);
-
-
-
-			}
+			drawO(g);
+			drawX(g);
 
 		}
 
